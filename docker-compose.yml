@@ -1,0 +1,93 @@
+version: "3.0"
+
+services:
+
+    ch_sd1_rp1:
+        container_name: ch_sd1_rp1
+        image: yandex/clickhouse-server:20.8.12.2
+        volumes:
+            - ./volumes/etc/ch_sd1_rp1/config.xml:/etc/clickhouse-server/config.xml:ro
+            - ./volumes/etc/users.xml:/etc/clickhouse-server/users.xml:ro
+            - ./volumes/var/data/ch_sd1_rp1:/var/lib/clickhouse:rw
+            - ./volumes/var/log/ch_sd1_rp1:/var/log/clickhouse-server:rw
+        ports:
+            - 8123:8123
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on: 
+            - zoo1
+            - zoo2
+            - zoo3
+
+    ch_sd1_rp2:
+        container_name: ch_sd1_rp2
+        image: yandex/clickhouse-server:20.8.12.2
+        volumes:
+            - ./volumes/etc/ch_sd1_rp2/config.xml:/etc/clickhouse-server/config.xml:ro
+            - ./volumes/etc/users.xml:/etc/clickhouse-server/users.xml:ro
+            - ./volumes/var/data/ch_sd1_rp2:/var/lib/clickhouse:rw
+            - ./volumes/var/log/ch_sd1_rp2:/var/log/clickhouse-server:rw
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on: 
+            - ch_sd1_rp1
+
+    ch_sd2_rp1:
+        container_name: ch_sd2_rp1
+        image: yandex/clickhouse-server:20.8.12.2
+        volumes:
+            - ./volumes/etc/ch_sd2_rp1/config.xml:/etc/clickhouse-server/config.xml:ro
+            - ./volumes/etc/users.xml:/etc/clickhouse-server/users.xml:ro
+            - ./volumes/var/data/ch_sd2_rp1:/var/lib/clickhouse:rw
+            - ./volumes/var/log/ch_sd2_rp1:/var/log/clickhouse-server:rw
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on: 
+            - ch_sd1_rp2
+
+    ch_sd2_rp2:
+        container_name: ch_sd2_rp2
+        image: yandex/clickhouse-server:20.8.12.2
+        volumes:
+            - ./volumes/etc/ch_sd2_rp2/config.xml:/etc/clickhouse-server/config.xml:ro
+            - ./volumes/etc/users.xml:/etc/clickhouse-server/users.xml:ro
+            - ./volumes/var/data/ch_sd2_rp2:/var/lib/clickhouse:rw
+            - ./volumes/var/log/ch_sd2_rp2:/var/log/clickhouse-server:rw
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on: 
+            - ch_sd2_rp1
+
+    zoo1:
+        container_name: zoo1
+        image: zookeeper:3.7.0
+        environment:
+            ZOO_MY_ID: 1
+            ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+
+    zoo2:
+        container_name: zoo2
+        image: zookeeper:3.7.0
+        environment:
+            ZOO_MY_ID: 2
+            ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+        depends_on: 
+            - zoo1
+
+    zoo3:
+        container_name: zoo3
+        image: zookeeper:3.7.0
+        environment:
+            ZOO_MY_ID: 3
+            ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+        depends_on: 
+            - zoo2
+    
