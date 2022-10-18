@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS db.data_dist ON CLUSTER docker

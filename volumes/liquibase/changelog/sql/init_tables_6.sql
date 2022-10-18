@@ -1,0 +1,1 @@
+OPTIMIZE TABLE db.data_rep ON CLUSTER docker FINAL
